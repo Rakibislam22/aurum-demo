@@ -447,7 +447,103 @@ body {
         display: none !important;
     }
 
+    .show-mobile {
+        display: flex !important;
+    }
+
     .hero-title {
-        font-size: clamp(42px, 11vw, 88px) !important;
+        font-size: clamp(36px, 9vw, 80px) !important;
+    }
+
+    .btn-primary,
+    .btn-ghost {
+        padding: 12px 24px;
+        font-size: 14px;
+        gap: 8px;
+    }
+
+    .btn-primary::after {
+        display: none;
+    }
+
+    .testimonial-card {
+        padding: clamp(20px, 5vw, 40px);
+    }
+
+    .value-card {
+        padding: clamp(20px, 4vw, 36px);
+    }
+
+    .input-field {
+        padding: 12px 16px;
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 640px) {
+    html {
+        font-size: 15px;
+    }
+
+    .hero-title {
+        font-size: clamp(28px, 8vw, 56px) !important;
+    }
+
+    .display-text {
+        font-size: clamp(20px, 6vw, 48px);
+    }
+
+    .nav-link {
+        font-size: 13px;
+    }
+
+    .btn-primary,
+    .btn-ghost {
+        padding: 11px 20px;
+        font-size: 13px;
+    }
+
+    .section-label {
+        font-size: 10px;
+    }
+
+    .bento-grid-container {
+        gap: 8px !important;
+    }
+
+    .footer-link {
+        font-size: 13px;
+        margin-bottom: 10px;
+    }
+}
+
+@media (min-width: 769px) {
+    .show-mobile {
+        display: none !important;
+    }
+}
+
+/* Bento grid: mobile-first column, switches to 3-column grid on larger screens */
+.bento-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.bento-grid .bento-card {
+    min-height: 250px;
+    position: relative;
+}
+
+@media (min-width: 900px) {
+    .bento-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        grid-template-rows: 300px 280px;
+        gap: 12px;
+    }
+
+    .bento-grid .bento-card {
+        min-height: auto;
     }
 }

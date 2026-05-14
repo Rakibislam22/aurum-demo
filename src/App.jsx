@@ -3,7 +3,7 @@ import {
   Search, ShoppingCart, User, ArrowRight, Star, Shield,
   Truck, Headphones, ChevronLeft, ChevronRight, Mail,
   Sparkles, Zap, Heart,
-  TrendingUp, Package, RotateCcw
+  TrendingUp, Package, RotateCcw, Menu, X
 } from "lucide-react";
 import { IoLogoInstagram, IoLogoTwitter, IoLogoYoutube } from "react-icons/io5";
 
@@ -33,6 +33,7 @@ function FontLoader() {
 function Navigation() {
   const [scrolled, setScrolled] = useState(false);
   const [cartCount] = useState(3);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -40,10 +41,22 @@ function Navigation() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // Close menu when scrolling
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [mobileMenuOpen]);
+
   return (
     <header style={{
       position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
-      padding: "0 32px",
+      padding: "0 20px",
       transition: "all 0.4s ease",
       ...(scrolled ? {
         background: "rgba(14,14,14,0.82)",
@@ -56,10 +69,11 @@ function Navigation() {
       <nav style={{
         maxWidth: 1280, margin: "0 auto",
         display: "flex", alignItems: "center", justifyContent: "space-between",
-        height: 72
+        height: "72px",
+        gap: "16px"
       }}>
         {/* Logo */}
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, flex: "0 0 auto" }}>
           <div style={{
             width: 34, height: 34,
             background: "linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%)",
@@ -70,20 +84,20 @@ function Navigation() {
           </div>
           <span style={{
             fontFamily: tokens.fontDisplay,
-            fontSize: 22, fontWeight: 700,
+            fontSize: "clamp(18px, 3vw, 22px)", fontWeight: 700,
             letterSpacing: "-0.02em", color: "var(--chalk)"
           }}>Aurum</span>
         </div>
 
-        {/* Nav Links */}
-        <div className="hide-mobile" style={{ display: "flex", gap: 36, alignItems: "center" }}>
+        {/* Nav Links - Desktop */}
+        <div className="hide-mobile" style={{ display: "flex", gap: 36, alignItems: "center", justifyContent: "center", flex: 1 }}>
           {["Collections", "New Arrivals", "Lookbook", "About"].map(l => (
             <a key={l} href="#" className="nav-link">{l}</a>
           ))}
         </div>
 
         {/* Actions */}
-        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 6, flex: "0 0 auto" }}>
           {[
             { Icon: Search, label: "search" },
             { Icon: User, label: "account" },
@@ -123,8 +137,50 @@ function Navigation() {
               }}>{cartCount}</span>
             )}
           </button>
+
+          {/* Mobile Menu Toggle */}
+          <button className="show-mobile" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            style={{
+              background: "none", border: "none",
+              color: "rgba(245,242,237,0.7)",
+              width: 40, height: 40, borderRadius: "2px",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              cursor: "pointer", transition: "color 0.2s, background 0.2s"
+            }}
+            onMouseEnter={e => { e.currentTarget.style.color = "var(--chalk)"; e.currentTarget.style.background = "rgba(245,242,237,0.06)"; }}
+            onMouseLeave={e => { e.currentTarget.style.color = "rgba(245,242,237,0.7)"; e.currentTarget.style.background = "none"; }}
+          >
+            {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+          </button>
         </div>
       </nav>
+
+      {/* Mobile Menu */}
+      {mobileMenuOpen && (
+        <div style={{
+          position: "absolute", top: "72px", left: 0, right: 0,
+          background: "rgba(14,14,14,0.95)",
+          backdropFilter: "blur(24px)",
+          borderBottom: "1px solid rgba(201,169,110,0.12)",
+          padding: "24px 20px",
+          display: "flex", flexDirection: "column", gap: 16
+        }}>
+          {["Collections", "New Arrivals", "Lookbook", "About"].map(l => (
+            <a key={l} href="#" style={{
+              color: "rgba(245,242,237,0.8)",
+              textDecoration: "none",
+              fontSize: "15px",
+              fontWeight: 500,
+              paddingBottom: "8px",
+              borderBottom: "1px solid rgba(245,242,237,0.1)",
+              transition: "color 0.2s"
+            }}
+              onMouseEnter={e => e.currentTarget.style.color = "var(--accent)"}
+              onMouseLeave={e => e.currentTarget.style.color = "rgba(245,242,237,0.8)"}
+            >{l}</a>
+          ))}
+        </div>
+      )}
     </header>
   );
 }
@@ -136,7 +192,8 @@ function HeroSection() {
       minHeight: "100vh",
       display: "flex", alignItems: "center",
       position: "relative", overflow: "hidden",
-      padding: "120px 32px 80px"
+      padding: "clamp(80px, 15vh, 120px) clamp(16px, 5vw, 32px) clamp(40px, 10vh, 80px)",
+      background: "#0e0e0e"
     }}>
       {/* Background gradient mesh */}
       <div style={{
@@ -145,7 +202,8 @@ function HeroSection() {
           radial-gradient(ellipse 80% 60% at 70% 40%, rgba(201,169,110,0.12) 0%, transparent 60%),
           radial-gradient(ellipse 50% 50% at 20% 80%, rgba(46,41,35,0.8) 0%, transparent 50%),
           linear-gradient(160deg, #1a1612 0%, #0e0e0e 60%)
-        `
+        `,
+        pointerEvents: "none"
       }} />
 
       {/* Decorative lines */}
@@ -162,68 +220,29 @@ function HeroSection() {
         borderRadius: "50%", pointerEvents: "none"
       }} />
 
-      {/* Floating product card */}
-      <div className="animate-float hide-mobile" style={{
-        position: "absolute", right: "8%", top: "50%",
-        transform: "translateY(-50%)",
-        width: 280,
+      <div style={{
+        maxWidth: 1280,
+        margin: "0 auto",
+        width: "100%",
+        position: "relative",
+        zIndex: 1,
+        minHeight: "500px",
+        display: "flex",
+        alignItems: "center"
       }}>
-        <div style={{
-          borderRadius: 6,
-          overflow: "hidden",
-          boxShadow: "0 40px 80px rgba(0,0,0,0.6)",
-          border: "1px solid rgba(201,169,110,0.2)"
-        }}>
-          <div style={{
-            height: 320,
-            background: "linear-gradient(145deg, #2a2420 0%, #1a1410 100%)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: 80
-          }}>🏺</div>
-          <div style={{ padding: "20px", background: "var(--mid)" }}>
-            <div className="tag-pill" style={{ marginBottom: 10 }}>
-              <Zap size={9} /> New Season
-            </div>
-            <p style={{ fontFamily: tokens.fontDisplay, fontSize: 18, marginBottom: 4 }}>
-              Artisan Vessel No. 7
-            </p>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <span style={{ color: "var(--accent)", fontWeight: 600, fontSize: 17 }}>$248</span>
-              <div style={{ display: "flex", gap: 2 }}>
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} size={11} fill="#c9a96e" color="#c9a96e" />
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-        {/* Floating badge */}
-        <div style={{
-          position: "absolute", top: -16, left: -16,
-          background: "var(--accent)",
-          color: "var(--ink)",
-          borderRadius: 2,
-          padding: "8px 14px",
-          fontSize: 12, fontWeight: 700,
-          fontFamily: tokens.fontMono,
-          letterSpacing: "0.06em",
-          boxShadow: "0 8px 24px rgba(201,169,110,0.4)"
-        }}>★ TRENDING</div>
-      </div>
 
-      {/* Content */}
-      <div style={{ maxWidth: 1280, margin: "0 auto", width: "100%", position: "relative", zIndex: 1 }}>
-        <div style={{ maxWidth: 640 }}>
+        {/* Left Side Content */}
+        <div style={{ maxWidth: "clamp(340px, 50vw, 640px)", position: "relative", zIndex: 2 }}>
           <div className="animate-fade-up opacity-0-init stagger-1" style={{ marginBottom: 24 }}>
             <span className="tag-pill" style={{ alignItems: "center", display: "inline-flex" }}>
               <TrendingUp size={10} style={{ verticalAlign: "middle" }} />
-              SS 2026 Collection
+              &nbsp;SS 2026 Collection
             </span>
           </div>
 
           <h1
             className="display-text animate-fade-up opacity-0-init stagger-2 hero-title"
-            style={{ fontSize: "clamp(52px, 7.5vw, 98px)", marginBottom: 28 }}
+            style={{ fontSize: "clamp(36px, 5.5vw, 84px)", marginBottom: 28, lineHeight: 1.1 }}
           >
             Objects of{" "}
             <em className="shimmer-text" style={{ fontStyle: "italic" }}>
@@ -233,9 +252,9 @@ function HeroSection() {
           </h1>
 
           <p className="animate-fade-up opacity-0-init stagger-3" style={{
-            fontSize: 17, color: "var(--stone)",
+            fontSize: 16, color: "var(--stone)",
             lineHeight: 1.75, marginBottom: 44,
-            maxWidth: 480, fontWeight: 300
+            maxWidth: 460, fontWeight: 300
           }}>
             Curated artifacts at the intersection of craft and concept.
             Each piece selected for those who see the world differently.
@@ -278,13 +297,65 @@ function HeroSection() {
             </div>
           </div>
         </div>
+
+        <div className="animate-float hide-mobile" style={{
+          position: "absolute",
+          right: "0px",
+          bottom: "20px",
+          width: "clamp(240px, 22vw, 290px)",
+          zIndex: 1
+        }}>
+          <div style={{
+            borderRadius: 6,
+            overflow: "hidden",
+            boxShadow: "0 40px 80px rgba(0,0,0,0.6)",
+            border: "1px solid rgba(201,169,110,0.2)"
+          }}>
+            <div style={{
+              height: "clamp(240px, 25vh, 320px)",
+              background: "linear-gradient(145deg, #2a2420 0%, #1a1410 100%)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontSize: 80
+            }}>🏺</div>
+            <div style={{ padding: "20px", background: "var(--mid)" }}>
+              <div className="tag-pill" style={{ marginBottom: 10 }}>
+                <Zap size={9} /> New Season
+              </div>
+              <p style={{ fontFamily: tokens.fontDisplay, fontSize: 18, marginBottom: 4 }}>
+                Artisan Vessel No. 7
+              </p>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <span style={{ color: "var(--accent)", fontWeight: 600, fontSize: 17 }}>$248</span>
+                <div style={{ display: "flex", gap: 2 }}>
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} size={11} fill="#c9a96e" color="#c9a96e" />
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+          {/* Floating badge */}
+          <div style={{
+            position: "absolute", top: -16, left: -16,
+            background: "var(--accent)",
+            color: "var(--ink)",
+            borderRadius: 2,
+            padding: "8px 14px",
+            fontSize: 12, fontWeight: 700,
+            fontFamily: tokens.fontMono,
+            letterSpacing: "0.06em",
+            boxShadow: "0 8px 24px rgba(201,169,110,0.4)"
+          }}>★ TRENDING</div>
+        </div>
+
       </div>
 
       {/* Bottom fade */}
       <div style={{
         position: "absolute", bottom: 0, left: 0, right: 0, height: 120,
         background: "linear-gradient(to top, var(--ink), transparent)",
-        pointerEvents: "none"
+        pointerEvents: "none",
+        zIndex: 2
       }} />
     </section>
   );
@@ -363,12 +434,7 @@ function BentoGrid() {
         </a>
       </div>
 
-      <div style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(3, 1fr)",
-        gridTemplateRows: "300px 280px",
-        gap: 12
-      }}>
+      <div className="bento-grid" style={{ gap: 12 }}>
         {BENTO_ITEMS.map((item) => (
           <div key={item.id} className="bento-card" style={{
             gridColumn: item.col,
@@ -441,7 +507,7 @@ const VALUES = [
 function ValueProps() {
   return (
     <section style={{
-      padding: "80px 32px",
+      padding: "clamp(40px, 8vw, 80px) clamp(16px, 5vw, 32px)",
       background: "var(--deep)",
       borderTop: "1px solid rgba(245,242,237,0.04)",
       borderBottom: "1px solid rgba(245,242,237,0.04)"
@@ -449,7 +515,7 @@ function ValueProps() {
       <div style={{ maxWidth: 1280, margin: "0 auto" }}>
         <div style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+          gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
           gap: 2
         }}>
           {VALUES.map(({ Icon, title, desc, color }, i) => (
@@ -463,7 +529,7 @@ function ValueProps() {
               }}>
                 <Icon size={20} color={color} />
               </div>
-              <h4 style={{ fontSize: 16, fontWeight: 600, marginBottom: 10 }}>{title}</h4>
+              <h4 style={{ fontSize: "clamp(14px, 2vw, 16px)", fontWeight: 600, marginBottom: 10 }}>{title}</h4>
               <p style={{ fontSize: 14, color: "var(--stone)", lineHeight: 1.65 }}>{desc}</p>
             </div>
           ))}
@@ -501,26 +567,26 @@ function Testimonials() {
   const t = TESTIMONIALS[idx];
 
   return (
-    <section style={{ padding: "100px 32px", maxWidth: 1280, margin: "0 auto" }}>
-      <div style={{ textAlign: "center", marginBottom: 60 }}>
+    <section style={{ padding: "clamp(40px, 8vw, 100px) clamp(16px, 5vw, 32px)", maxWidth: 1280, margin: "0 auto" }}>
+      <div style={{ textAlign: "center", marginBottom: "clamp(40px, 8vw, 60px)" }}>
         <p className="section-label" style={{ marginBottom: 12 }}>What Collectors Say</p>
-        <h2 className="display-text" style={{ fontSize: "clamp(28px, 3.5vw, 46px)" }}>
+        <h2 className="display-text" style={{ fontSize: "clamp(24px, 5vw, 46px)" }}>
           Voices of the Community
         </h2>
       </div>
 
       <div style={{ maxWidth: 720, margin: "0 auto", position: "relative" }}>
-        <div className="testimonial-card" style={{ textAlign: "center", position: "relative" }}>
+        <div className="testimonial-card" style={{ textAlign: "center", position: "relative", padding: "clamp(24px, 5vw, 40px)" }}>
           {/* Quote mark */}
           <div style={{
             fontFamily: tokens.fontDisplay,
-            fontSize: 80, lineHeight: 0.8,
+            fontSize: "clamp(48px, 10vw, 80px)", lineHeight: 0.8,
             color: "var(--accent)", opacity: 0.25,
             marginBottom: 20, userSelect: "none"
           }}>"</div>
 
           <p style={{
-            fontSize: 18, lineHeight: 1.8,
+            fontSize: "clamp(16px, 3vw, 18px)", lineHeight: 1.8,
             color: "rgba(245,242,237,0.85)",
             fontStyle: "italic",
             fontFamily: tokens.fontDisplay,
@@ -535,13 +601,13 @@ function Testimonials() {
           </div>
 
           {/* Author */}
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 14 }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 14, flexWrap: "wrap" }}>
             <div style={{
               width: 48, height: 48, borderRadius: "50%",
               background: "var(--mid)",
               border: "2px solid var(--accent)",
               display: "flex", alignItems: "center", justifyContent: "center",
-              fontSize: 22
+              fontSize: 22, flexShrink: 0
             }}>{t.avatar}</div>
             <div style={{ textAlign: "left" }}>
               <p style={{ fontWeight: 600, fontSize: 15 }}>{t.name}</p>
@@ -551,7 +617,7 @@ function Testimonials() {
         </div>
 
         {/* Navigation */}
-        <div style={{ display: "flex", justifyContent: "center", gap: 12, marginTop: 32, alignItems: "center" }}>
+        <div style={{ display: "flex", justifyContent: "center", gap: "clamp(8px, 2vw, 12px)", marginTop: "clamp(24px, 5vw, 32px)", alignItems: "center", flexWrap: "wrap" }}>
           <button onClick={prev} style={{
             width: 40, height: 40, borderRadius: 2,
             background: "none", border: "1px solid rgba(245,242,237,0.12)",
@@ -603,11 +669,11 @@ function Newsletter() {
   };
 
   return (
-    <section style={{ padding: "80px 32px" }}>
+    <section style={{ padding: "clamp(40px, 8vw, 80px) clamp(16px, 5vw, 32px)" }}>
       <div style={{ maxWidth: 1280, margin: "0 auto" }}>
         <div className="glass" style={{
           borderRadius: 6,
-          padding: "72px 60px",
+          padding: "clamp(36px, 8vw, 72px) clamp(24px, 5vw, 60px)",
           background: "linear-gradient(135deg, rgba(201,169,110,0.08) 0%, rgba(26,22,18,0.4) 100%)",
           backdropFilter: "blur(24px)",
           position: "relative", overflow: "hidden"
@@ -623,16 +689,16 @@ function Newsletter() {
 
           <div style={{ maxWidth: 560, position: "relative", zIndex: 1 }}>
             <p className="section-label" style={{ marginBottom: 16 }}>Join the Inner Circle</p>
-            <h2 className="display-text" style={{ fontSize: "clamp(28px, 3.5vw, 44px)", marginBottom: 16 }}>
+            <h2 className="display-text" style={{ fontSize: "clamp(24px, 5vw, 44px)", marginBottom: 16 }}>
               Early Access & Exclusive Drops
             </h2>
-            <p style={{ color: "var(--stone)", marginBottom: 36, lineHeight: 1.7, fontSize: 15 }}>
+            <p style={{ color: "var(--stone)", marginBottom: 36, lineHeight: 1.7, fontSize: "clamp(14px, 2vw, 15px)" }}>
               Subscribe to receive priority access to new collections, private sales,
               and curatorial notes from our selection team.
             </p>
 
             {!submitted ? (
-              <div style={{ display: "flex", gap: 8 }}>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                 <input
                   className="input-field"
                   type="email"
@@ -640,9 +706,9 @@ function Newsletter() {
                   value={email}
                   onChange={e => setEmail(e.target.value)}
                   onKeyDown={e => e.key === "Enter" && handleSubmit()}
-                  style={{ flex: 1 }}
+                  style={{ flex: "1 1 auto", minWidth: "200px" }}
                 />
-                <button className="btn-primary" onClick={handleSubmit} style={{ whiteSpace: "nowrap" }}>
+                <button className="btn-primary" onClick={handleSubmit} style={{ whiteSpace: "nowrap", flex: "0 1 auto" }}>
                   Subscribe <Mail size={15} />
                 </button>
               </div>
@@ -653,7 +719,8 @@ function Newsletter() {
                 background: "rgba(138,212,106,0.1)",
                 border: "1px solid rgba(138,212,106,0.25)",
                 borderRadius: 2,
-                color: "#8ad46a"
+                color: "#8ad46a",
+                flexWrap: "wrap"
               }}>
                 <Sparkles size={18} />
                 <span style={{ fontWeight: 500 }}>Welcome to the Inner Circle. Watch your inbox.</span>
@@ -690,13 +757,13 @@ function Footer() {
     <footer style={{
       background: "var(--deep)",
       borderTop: "1px solid rgba(245,242,237,0.06)",
-      padding: "80px 32px 40px"
+      padding: "clamp(40px, 8vw, 80px) clamp(16px, 5vw, 32px) clamp(24px, 5vw, 40px)"
     }}>
       <div style={{ maxWidth: 1280, margin: "0 auto" }}>
         <div style={{
           display: "grid",
-          gridTemplateColumns: "2fr 1fr 1fr 1fr",
-          gap: 48, marginBottom: 64
+          gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
+          gap: "clamp(24px, 5vw, 48px)", marginBottom: "clamp(40px, 8vw, 64px)"
         }}>
           {/* Brand column */}
           <div>
@@ -711,14 +778,14 @@ function Footer() {
               </div>
               <span style={{
                 fontFamily: tokens.fontDisplay,
-                fontSize: 22, fontWeight: 700, letterSpacing: "-0.02em"
+                fontSize: "clamp(18px, 3vw, 22px)", fontWeight: 700, letterSpacing: "-0.02em"
               }}>Aurum</span>
             </div>
             <p style={{ fontSize: 14, color: "var(--stone)", lineHeight: 1.8, maxWidth: 260, marginBottom: 28 }}>
               Curated objects for lives lived with intention.
               Beauty at the intersection of craft and concept.
             </p>
-            <div style={{ display: "flex", gap: 10 }}>
+            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
               {[IoLogoInstagram, IoLogoTwitter, IoLogoYoutube].map((Icon, i) => (
                 <a key={i} href="#" style={{
                   width: 36, height: 36, borderRadius: 2,
@@ -761,7 +828,7 @@ function Footer() {
           <p style={{ fontSize: 13, color: "var(--stone)" }}>
             © 2026 Aurum Studio Ltd. All rights reserved.
           </p>
-          <div style={{ display: "flex", gap: 28 }}>
+          <div style={{ display: "flex", gap: "clamp(16px, 3vw, 28px)", flexWrap: "wrap" }}>
             {["Privacy Policy", "Terms of Service", "Cookie Settings"].map(l => (
               <a key={l} href="#" style={{
                 fontSize: 13, color: "var(--stone)", textDecoration: "none",
