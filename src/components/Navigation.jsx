@@ -1,12 +1,20 @@
-import { useEffect, useState } from "react";
-import { Link, NavLink } from "react-router";
+import { useEffect, useRef, useState } from "react";
+import { Link, NavLink, useNavigate } from "react-router";
 import { FiMenu, FiSearch, FiShoppingBag, FiStar, FiUser, FiX } from "react-icons/fi";
 import { siteLinks } from "../lib/siteTheme";
 
 function Navigation() {
+    const navigate = useNavigate();
+    const searchPanelRef = useRef(null);
+    const searchButtonRef = useRef(null);
     const [scrolled, setScrolled] = useState(false);
     const [cartCount] = useState(3);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [searchOpen, setSearchOpen] = useState(false);
+    const [searchQuery, setSearchQuery] = useState("");
+    const [searchResults, setSearchResults] = useState([]);
+    const [searchLoading, setSearchLoading] = useState(false);
+    const [searchError, setSearchError] = useState("");
 
     useEffect(() => {
         const onScroll = () => setScrolled(window.scrollY > 40);
@@ -24,6 +32,70 @@ function Navigation() {
             document.body.style.overflow = "auto";
         };
     }, [mobileMenuOpen]);
+
+    useEffect(() => {
+        function handlePointerDown(event) {
+            if (!searchOpen) {
+                return;
+            }
+
+            const clickedSearchButton = searchButtonRef.current?.contains(event.target);
+            const clickedSearchPanel = searchPanelRef.current?.contains(event.target);
+
+            if (!clickedSearchButton && !clickedSearchPanel) {
+                setSearchOpen(false);
+            }
+        }
+
+        document.addEventListener("mousedown", handlePointerDown);
+
+        return () => document.removeEventListener("mousedown", handlePointerDown);
+    }, [searchOpen]);
+
+    useEffect(() => {
+        const query = searchQuery.trim();
+
+        if (!searchOpen) {
+            return undefined;
+        }
+
+        if (!query) {
+            return undefined;
+        }
+
+        const controller = new AbortController();
+        const timeoutId = window.setTimeout(async () => {
+            setSearchLoading(true);
+            setSearchError("");
+
+            try {
+                const response = await fetch(`https://dummyjson.com/products/search?q=${encodeURIComponent(query)}`, {
+                    signal: controller.signal,
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Search failed with status ${response.status}`);
+                }
+
+                const data = await response.json();
+                setSearchResults((data.products || []).slice(0, 5));
+            } catch (fetchError) {
+                if (fetchError.name !== "AbortError") {
+                    setSearchError("Search failed. Try again.");
+                    setSearchResults([]);
+                }
+            } finally {
+                if (!controller.signal.aborted) {
+                    setSearchLoading(false);
+                }
+            }
+        }, 220);
+
+        return () => {
+            controller.abort();
+            window.clearTimeout(timeoutId);
+        };
+    }, [searchOpen, searchQuery]);
 
     const navButtonStyle = {
         background: "none",
@@ -114,9 +186,11 @@ function Navigation() {
 
                 <div style={{ display: "flex", alignItems: "center", gap: 6, flex: "0 0 auto" }}>
                     <button
+                        ref={searchButtonRef}
                         type="button"
                         style={navButtonStyle}
                         aria-label="search"
+                        onClick={() => setSearchOpen((s) => !s)}
                         onMouseEnter={(e) => {
                             e.currentTarget.style.color = "var(--chalk)";
                             e.currentTarget.style.background = "rgba(245,242,237,0.06)";
@@ -128,6 +202,121 @@ function Navigation() {
                     >
                         <FiSearch size={18} />
                     </button>
+
+                    {searchOpen && (
+                        <div ref={searchPanelRef} style={{ position: "relative" }}>
+                            <div
+                                style={{
+                                    position: "absolute",
+                                    right: 0,
+                                    top: 48,
+                                    width: 360,
+                                    maxWidth: "calc(100vw - 40px)",
+                                    background: "rgba(14,14,14,0.98)",
+                                    border: "1px solid rgba(255,255,255,0.06)",
+                                    padding: 12,
+                                    borderRadius: 8,
+                                    boxShadow: "0 12px 40px rgba(0,0,0,0.6)",
+                                    zIndex: 120,
+                                }}
+                            >
+                                <form
+                                    onSubmit={(e) => {
+                                        e.preventDefault();
+                                        const query = searchQuery.trim();
+
+                                        if (!query) {
+                                            return;
+                                        }
+
+                                        setSearchOpen(false);
+                                        navigate(`/collections?q=${encodeURIComponent(query)}`);
+                                    }}
+                                >
+                                    <div style={{ display: "flex", gap: 8 }}>
+                                        <input
+                                            autoFocus
+                                            value={searchQuery}
+                                            onChange={(e) => setSearchQuery(e.target.value)}
+                                            placeholder="Search products... (try: phone)"
+                                            onKeyDown={(e) => {
+                                                if (e.key === "Escape") {
+                                                    setSearchOpen(false);
+                                                }
+                                            }}
+                                            style={{
+                                                flex: 1,
+                                                padding: "10px 12px",
+                                                borderRadius: 6,
+                                                border: "1px solid rgba(255,255,255,0.06)",
+                                                background: "transparent",
+                                                color: "var(--chalk)",
+                                            }}
+                                        />
+                                        <button type="submit" style={{ ...navButtonStyle, width: 44 }} aria-label="submit search">
+                                            <FiSearch size={16} />
+                                        </button>
+                                    </div>
+                                </form>
+
+                                <div style={{ marginTop: 10, color: "#a39a8c", fontSize: 13, lineHeight: 1.6 }}>
+                                    Search by product name or category, then press Enter to view matching results on Collections.
+                                </div>
+
+                                <div style={{ marginTop: 12, maxHeight: 320, overflow: "auto" }}>
+                                    {searchLoading && <div style={{ color: "#a39a8c", fontSize: 13 }}>Searching…</div>}
+                                    {searchError && <div style={{ color: "#ff6b6b", fontSize: 13 }}>{searchError}</div>}
+                                    {!searchLoading && !searchError && searchQuery.trim() && searchResults.length === 0 && (
+                                        <div style={{ color: "#a39a8c", fontSize: 13 }}>No results found</div>
+                                    )}
+
+                                    {searchResults.map((product) => (
+                                        <Link
+                                            key={product.id}
+                                            to={`/products/${product.id}`}
+                                            onClick={() => {
+                                                setSearchOpen(false);
+                                                setSearchQuery("");
+                                            }}
+                                            style={{
+                                                display: "flex",
+                                                gap: 10,
+                                                alignItems: "center",
+                                                textDecoration: "none",
+                                                color: "var(--chalk)",
+                                                padding: 10,
+                                                borderRadius: 8,
+                                                border: "1px solid rgba(255,255,255,0.06)",
+                                                background: "rgba(255,255,255,0.02)",
+                                                marginTop: 8,
+                                            }}
+                                        >
+                                            <img
+                                                src={product.thumbnail || product.images?.[0] || ""}
+                                                alt={product.title}
+                                                style={{ width: 52, height: 52, objectFit: "cover", borderRadius: 8, flex: "0 0 auto" }}
+                                            />
+
+                                            <div style={{ minWidth: 0, flex: 1 }}>
+                                                <div style={{ fontSize: 14, fontWeight: 600, lineHeight: 1.3 }}>
+                                                    {product.title}
+                                                </div>
+                                                <div style={{ marginTop: 4, display: "flex", flexWrap: "wrap", gap: 8, fontSize: 12, color: "#a39a8c" }}>
+                                                    <span>{product.category}</span>
+                                                    <span>{Math.round(product.price)} USD</span>
+                                                    {product.brand && <span>{product.brand}</span>}
+                                                </div>
+                                            </div>
+
+                                            <div style={{ color: "#c9a96e", fontSize: 12, fontWeight: 600, flex: "0 0 auto" }}>
+                                                View
+                                            </div>
+                                        </Link>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                     <button
                         type="button"
