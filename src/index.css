@@ -1,11 +1,10 @@
 @import "tailwindcss";
+@source "./";
 
 *,
 *::before,
 *::after {
     box-sizing: border-box;
-    margin: 0;
-    padding: 0;
 }
 
 :root {
@@ -27,9 +26,16 @@ html {
     scroll-behavior: smooth;
 }
 
+html,
+body,
+#root {
+    min-height: 100%;
+}
+
 body {
     background: var(--ink);
     color: var(--chalk);
+    margin: 0;
     font-family: 'DM Sans', sans-serif;
     font-size: 16px;
     line-height: 1.6;
