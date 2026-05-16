@@ -6,6 +6,7 @@ import Collections from "../pages/Collections";
 import Lookbook from "../pages/Lookbook";
 import ProductDetail from "../pages/ProductDetail";
 import NewArrivals from "../pages/NewArrivals";
+import NewArrivalDetail from "../pages/NewArrivalDetail";
 
 const router = createBrowserRouter([
   {
@@ -27,6 +28,10 @@ const router = createBrowserRouter([
       {
         path: "new-arrivals",
         element: <NewArrivals />,
+      },
+      {
+        path: "new-arrivals/:id",
+        element: <NewArrivalDetail />,
       },
       {
         path: "lookbook",
