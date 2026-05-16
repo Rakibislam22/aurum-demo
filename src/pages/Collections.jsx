@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { FiArrowRight, FiFilter } from "react-icons/fi";
+import { FiArrowRight, FiFilter, FiShoppingBag } from "react-icons/fi";
 import { Link } from "react-router";
 import { siteTokens } from "../lib/siteTheme";
 
@@ -17,6 +17,11 @@ const currencyFormatter = new Intl.NumberFormat("en-US", {
     currency: "USD",
     maximumFractionDigits: 0,
 });
+
+const PRODUCT_API_ENDPOINTS = [
+    "https://dummyjson.com/products?limit=500",
+    "https://dummyjson.com/products",
+];
 
 function normalizeProduct(product) {
     return {
@@ -86,16 +91,34 @@ export default function Collections() {
             setError("");
 
             try {
-                const response = await fetch("https://dummyjson.com/products?limit=500", {
-                    signal: controller.signal,
-                });
+                let lastError = null;
 
-                if (!response.ok) {
-                    throw new Error(`Request failed with status ${response.status}`);
+                for (const endpoint of PRODUCT_API_ENDPOINTS) {
+                    try {
+                        const response = await fetch(endpoint, {
+                            signal: controller.signal,
+                        });
+
+                        if (!response.ok) {
+                            throw new Error(`Request failed with status ${response.status}`);
+                        }
+
+                        const data = await response.json();
+                        setProducts((data.products || []).map(normalizeProduct));
+                        lastError = null;
+                        break;
+                    } catch (fetchError) {
+                        if (fetchError.name === "AbortError") {
+                            throw fetchError;
+                        }
+
+                        lastError = fetchError;
+                    }
                 }
 
-                const data = await response.json();
-                setProducts((data.products || []).map(normalizeProduct));
+                if (lastError) {
+                    throw lastError;
+                }
             } catch (fetchError) {
                 if (fetchError.name !== "AbortError") {
                     setError("We could not load the latest catalog right now. Please try again.");
@@ -180,44 +203,66 @@ export default function Collections() {
                                 {visibleProducts.map((product) => (
                                     <article
                                         key={product.id}
-                                        className="group relative flex min-h-128 flex-col overflow-hidden rounded-3xl border border-white/10 bg-linear-to-br from-[#151311] via-[#121110] to-[#0b0b0b] shadow-[0_24px_80px_rgba(0,0,0,0.35)] transition-all duration-500 hover:-translate-y-1 hover:border-white/15"
+                                        className="group overflow-hidden rounded-[28px] border border-white/8 bg-[#131111] shadow-[0_24px_80px_rgba(0,0,0,0.28)] transition-all duration-500 hover:-translate-y-1 hover:border-[#c9a96e]/30"
                                     >
-                                        <div className="relative h-[64%] min-h-[22rem] overflow-hidden bg-[#0c0b0a]">
+                                        <div className="relative aspect-4/5 overflow-hidden">
                                             <img
                                                 src={product.image}
                                                 alt={product.title}
                                                 className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                                                 loading="lazy"
                                             />
-                                        </div>
 
-                                        <div className="relative flex flex-1 flex-col justify-end p-6 sm:p-7">
-                                            <div className="flex items-start justify-between gap-3">
-                                                <span className="rounded-full border border-white/10 bg-black/20 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.28em] text-[#f5f2ed]" style={{ fontFamily: siteTokens.fontMono }}>
-                                                    {product.chip}
-                                                </span>
-                                                <span className="text-xs uppercase tracking-[0.28em] text-[#c9a96e]" style={{ fontFamily: siteTokens.fontMono }}>
-                                                    {currencyFormatter.format(product.price)}
-                                                </span>
+                                            <div className="absolute inset-0 bg-linear-to-t from-black via-black/10 to-transparent opacity-90" />
+
+                                            <div className="absolute left-4 top-4 rounded-full border border-white/10 bg-black/45 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.28em] text-[#f5f2ed] backdrop-blur-sm" style={{ fontFamily: siteTokens.fontMono }}>
+                                                {product.chip}
                                             </div>
 
-                                            <div className="mt-10 flex flex-1 flex-col justify-end">
-                                                <h2 className="max-w-[14ch] text-2xl font-semibold tracking-[-0.04em] text-[#f8f4ef] sm:text-[1.9rem]" style={{ fontFamily: siteTokens.fontDisplay }}>
-                                                    {product.title}
-                                                </h2>
+                                            <div className="absolute right-4 top-4 rounded-full border border-[#c9a96e]/25 bg-black/45 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.28em] text-[#c9a96e] backdrop-blur-sm" style={{ fontFamily: siteTokens.fontMono }}>
+                                                {currencyFormatter.format(product.price)}
+                                            </div>
 
-                                                <div className="mt-8 flex items-center justify-between gap-4 border-t border-white/10 pt-5 text-sm text-[#f5f2ed]">
-                                                    <span className="text-xs uppercase tracking-[0.24em] text-[#a39989]" style={{ fontFamily: siteTokens.fontMono }}>
-                                                        Premium edit
-                                                    </span>
-                                                    <Link
-                                                        to={`/products/${product.id}`}
-                                                        className="inline-flex items-center gap-2 text-[#c9a96e] transition-transform duration-300 group-hover:translate-x-1"
-                                                    >
-                                                        View edit
-                                                        <FiArrowRight />
-                                                    </Link>
+                                            <div className="absolute inset-x-4 bottom-4 flex translate-y-4 flex-col gap-3 rounded-[22px] border border-white/10 bg-[#0e0e0e]/75 p-4 opacity-0 backdrop-blur-md transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100 sm:flex-row sm:items-center sm:justify-between">
+                                                <Link
+                                                    to={`/products/${product.id}`}
+                                                    className="inline-flex items-center justify-center gap-2 rounded-full border border-white/12 px-4 py-2 text-xs font-medium uppercase tracking-[0.24em] text-[#f5f2ed] transition-colors duration-300 hover:border-[#c9a96e] hover:text-[#c9a96e]"
+                                                >
+                                                    <FiShoppingBag />
+                                                    View detail
+                                                </Link>
+                                                <button
+                                                    type="button"
+                                                    className="inline-flex items-center justify-center gap-1 rounded-full bg-[#c9a96e] px-3 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-[#0e0e0e] transition-transform duration-300 hover:scale-[1.02]"
+                                                >
+                                                    Add to Cart
+                                                    <FiArrowRight />
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-4 p-5 sm:p-6">
+                                            <div className="flex items-start justify-between gap-4">
+                                                <div>
+                                                    <h2 className="font-['Playfair_Display',Georgia,serif] text-2xl font-semibold tracking-[-0.03em] text-[#f5f2ed]">
+                                                        {product.title}
+                                                    </h2>
                                                 </div>
+                                                <span className="text-lg font-semibold text-[#c9a96e]">{currencyFormatter.format(product.price)}</span>
+                                            </div>
+
+                                            <p className="text-sm leading-7 text-[#d8d1c7]">
+                                                {product.description || "Curated product detail from the live catalog."}
+                                            </p>
+
+                                            <div className="flex items-center justify-between border-t border-white/8 pt-4">
+                                                <Link
+                                                    to={`/products/${product.id}`}
+                                                    className="inline-flex items-center gap-2 text-sm font-medium text-[#f5f2ed] transition-colors duration-300 hover:text-[#c9a96e]"
+                                                >
+                                                    View detail
+                                                    <FiArrowRight />
+                                                </Link>
                                             </div>
                                         </div>
                                     </article>
