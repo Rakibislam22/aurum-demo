@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Outlet } from "react-router";
 import Footer from "../components/Footer";
 import Navigation from "../components/Navigation";
+import ChatWidget from "../components/ChatWidget";
 import { siteTokens } from "../lib/siteTheme";
 
 function FontLoader() {
@@ -27,6 +28,7 @@ export default function SiteLayout() {
                 <Outlet />
             </main>
             <Footer tokens={siteTokens} />
+            <ChatWidget />
         </>
     );
 }
