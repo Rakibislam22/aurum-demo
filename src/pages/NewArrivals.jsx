@@ -1,56 +1,6 @@
 import { FiArrowRight, FiEye, FiShoppingBag, FiStar } from "react-icons/fi";
 import { Link } from "react-router";
-
-const ARRIVALS = [
-    {
-        name: "Column Coat",
-        category: "Outerwear",
-        price: "$320",
-        description: "Sharp shoulders, deep drape, and a matte wool finish.",
-        image:
-            "https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1200&q=80",
-    },
-    {
-        name: "Studio Shirt",
-        category: "Tailoring",
-        price: "$180",
-        description: "A clean silhouette with quiet structure through the body.",
-        image:
-            "https://images.unsplash.com/photo-1529139574466-a303027c1d8b?auto=format&fit=crop&w=1200&q=80",
-    },
-    {
-        name: "Linear Tote",
-        category: "Accessories",
-        price: "$145",
-        description: "Designed to move from day edits to after-dark appointments.",
-        image:
-            "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=1200&q=80",
-    },
-    {
-        name: "Noir Loafer",
-        category: "Footwear",
-        price: "$240",
-        description: "Polished, minimal, and built for long wear.",
-        image:
-            "https://images.unsplash.com/photo-1520639888713-7851133b1ed0?auto=format&fit=crop&w=1200&q=80",
-    },
-    {
-        name: "Vessel Candle",
-        category: "Home",
-        price: "$62",
-        description: "A low, warm profile with a scent that lingers softly.",
-        image:
-            "https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&w=1200&q=80",
-    },
-    {
-        name: "Silk Line Dress",
-        category: "Evening",
-        price: "$410",
-        description: "Liquid movement, precise cut, and a refined finish.",
-        image:
-            "https://images.unsplash.com/photo-1496747611176-843222e1e57c?auto=format&fit=crop&w=1200&q=80",
-    },
-];
+import { NEW_ARRIVALS, formatNewArrivalPrice } from "../lib/newArrivalsData";
 
 function ArrivalCard({ item }) {
     return (
@@ -70,16 +20,17 @@ function ArrivalCard({ item }) {
                 </div>
 
                 <div className="absolute inset-x-4 bottom-4 flex translate-y-4 flex-col gap-3 rounded-[22px] border border-white/10 bg-[#0e0e0e]/75 p-4 opacity-0 backdrop-blur-md transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100 sm:flex-row sm:items-center sm:justify-between">
-                    <button
+                    <Link
+                        to={`/new-arrivals/${item.id}`}
                         type="button"
                         className="inline-flex items-center justify-center gap-2 rounded-full border border-white/12 px-4 py-2 text-xs font-medium uppercase tracking-[0.24em] text-[#f5f2ed] transition-colors duration-300 hover:border-[#c9a96e] hover:text-[#c9a96e]"
                     >
                         <FiEye />
                         Quick View
-                    </button>
+                    </Link>
                     <button
                         type="button"
-                        className="inline-flex items-center justify-center gap-2 rounded-full bg-[#c9a96e] px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-[#0e0e0e] transition-transform duration-300 hover:scale-[1.02]"
+                        className="inline-flex items-center justify-center gap-1 rounded-full bg-[#c9a96e] px-3 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-[#0e0e0e] transition-transform duration-300 hover:scale-[1.02]"
                     >
                         <FiShoppingBag />
                         Add to Cart
@@ -97,7 +48,7 @@ function ArrivalCard({ item }) {
                             {item.category}
                         </p>
                     </div>
-                    <span className="text-lg font-semibold text-[#c9a96e]">{item.price}</span>
+                    <span className="text-lg font-semibold text-[#c9a96e]">{formatNewArrivalPrice(item.price)}</span>
                 </div>
 
                 <p className="text-sm leading-7 text-[#d8d1c7]">{item.description}</p>
@@ -140,7 +91,7 @@ export default function NewArrivals() {
                 </div>
 
                 <div className="mt-10 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-                    {ARRIVALS.map((item) => (
+                    {NEW_ARRIVALS.map((item) => (
                         <ArrivalCard key={item.name} item={item} />
                     ))}
                 </div>
