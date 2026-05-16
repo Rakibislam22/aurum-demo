@@ -23,7 +23,7 @@ export default function SiteLayout() {
             <FontLoader />
             <div className="grain-overlay" />
             <Navigation />
-            <main className="min-h-screen pt-18">
+            <main className="min-h-screen ">
                 <Outlet />
             </main>
             <Footer tokens={siteTokens} />

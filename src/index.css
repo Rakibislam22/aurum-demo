@@ -1,5 +1,4 @@
 @import "tailwindcss";
-@source "./";
 
 *,
 *::before,
@@ -20,10 +19,12 @@
     --glass-bg: rgba(245, 242, 237, 0.06);
     --glass-border: rgba(201, 169, 110, 0.18);
     --shadow-warm: 0 20px 60px rgba(14, 14, 14, 0.35);
+    --site-nav-height: 4.5rem;
 }
 
 html {
     scroll-behavior: smooth;
+    scroll-padding-top: var(--site-nav-height);
 }
 
 html,

@@ -10,12 +10,16 @@ function Navigation() {
 
     useEffect(() => {
         const onScroll = () => setScrolled(window.scrollY > 40);
-        window.addEventListener("scroll", onScroll);
+
+        onScroll();
+        window.addEventListener("scroll", onScroll, { passive: true });
+
         return () => window.removeEventListener("scroll", onScroll);
     }, []);
 
     useEffect(() => {
         document.body.style.overflow = mobileMenuOpen ? "hidden" : "auto";
+
         return () => {
             document.body.style.overflow = "auto";
         };
@@ -53,37 +57,51 @@ function Navigation() {
                         borderBottom: "1px solid rgba(201,169,110,0.12)",
                         boxShadow: "0 8px 40px rgba(0,0,0,0.4)",
                     }
-                    : {}),
+                    : {
+                        background: "transparent",
+                        borderBottom: "1px solid transparent",
+                        boxShadow: "none",
+                        backdropFilter: "none",
+                        WebkitBackdropFilter: "none",
+                    }),
             }}
         >
-            <nav style={{
-                maxWidth: 1280,
-                margin: "0 auto",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                height: 72,
-                gap: 16,
-            }}>
+            <nav
+                style={{
+                    maxWidth: 1280,
+                    margin: "0 auto",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    height: 72,
+                    gap: 16,
+                }}
+            >
                 <Link to="/" style={{ display: "flex", alignItems: "center", gap: 10, flex: "0 0 auto", textDecoration: "none" }}>
-                    <div style={{
-                        width: 34,
-                        height: 34,
-                        background: "linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%)",
-                        borderRadius: "2px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                    }}>
+                    <div
+                        style={{
+                            width: 34,
+                            height: 34,
+                            background: "linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%)",
+                            borderRadius: "2px",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                        }}
+                    >
                         <FiStar size={16} color="#0e0e0e" />
                     </div>
-                    <span style={{
-                        fontFamily: "'Playfair Display', Georgia, serif",
-                        fontSize: "clamp(18px, 3vw, 22px)",
-                        fontWeight: 700,
-                        letterSpacing: "-0.02em",
-                        color: "var(--chalk)",
-                    }}>Aurum</span>
+                    <span
+                        style={{
+                            fontFamily: "'Playfair Display', Georgia, serif",
+                            fontSize: "clamp(18px, 3vw, 22px)",
+                            fontWeight: 700,
+                            letterSpacing: "-0.02em",
+                            color: "var(--chalk)",
+                        }}
+                    >
+                        Aurum
+                    </span>
                 </Link>
 
                 <div className="hide-mobile" style={{ display: "flex", gap: 36, alignItems: "center", justifyContent: "center", flex: 1 }}>
@@ -142,21 +160,25 @@ function Navigation() {
                     >
                         <FiShoppingBag size={18} />
                         {cartCount > 0 && (
-                            <span style={{
-                                position: "absolute",
-                                top: 6,
-                                right: 6,
-                                width: 16,
-                                height: 16,
-                                borderRadius: "50%",
-                                background: "var(--accent)",
-                                color: "var(--ink)",
-                                fontSize: 9,
-                                fontWeight: 700,
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                            }}>{cartCount}</span>
+                            <span
+                                style={{
+                                    position: "absolute",
+                                    top: 6,
+                                    right: 6,
+                                    width: 16,
+                                    height: 16,
+                                    borderRadius: "50%",
+                                    background: "var(--accent)",
+                                    color: "var(--ink)",
+                                    fontSize: 9,
+                                    fontWeight: 700,
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                }}
+                            >
+                                {cartCount}
+                            </span>
                         )}
                     </button>
 
@@ -181,26 +203,23 @@ function Navigation() {
             </nav>
 
             {mobileMenuOpen && (
-                <div style={{
-                    position: "absolute",
-                    top: 72,
-                    left: 0,
-                    right: 0,
-                    background: "rgba(14,14,14,0.95)",
-                    backdropFilter: "blur(24px)",
-                    borderBottom: "1px solid rgba(201,169,110,0.12)",
-                    padding: "24px 20px",
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: 16,
-                }}>
+                <div
+                    style={{
+                        position: "absolute",
+                        top: 72,
+                        left: 0,
+                        right: 0,
+                        background: "rgba(14,14,14,0.95)",
+                        backdropFilter: "blur(24px)",
+                        borderBottom: "1px solid rgba(201,169,110,0.12)",
+                        padding: "24px 20px",
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 16,
+                    }}
+                >
                     {siteLinks.map((link) => (
-                        <NavLink
-                            key={link.to}
-                            to={link.to}
-                            onClick={() => setMobileMenuOpen(false)}
-                            className="nav-link"
-                        >
+                        <NavLink key={link.to} to={link.to} onClick={() => setMobileMenuOpen(false)} className="nav-link">
                             {link.label}
                         </NavLink>
                     ))}
