@@ -1,8 +1,8 @@
-import { Sparkles } from "lucide-react";
 import { IoLogoInstagram, IoLogoTwitter, IoLogoYoutube } from "react-icons/io5";
+import { FiStar } from "react-icons/fi";
 
 // ─── FOOTER ────────────────────────────────────────────────────────────────────
-function Footer({tokens}) {
+function Footer({ tokens }) {
     const cols = [
         {
             title: "Shop",
@@ -39,7 +39,7 @@ function Footer({tokens}) {
                                 borderRadius: "2px",
                                 display: "flex", alignItems: "center", justifyContent: "center"
                             }}>
-                                <Sparkles size={16} color="#0e0e0e" />
+                                <FiStar size={16} color="#0e0e0e" />
                             </div>
                             <span style={{
                                 fontFamily: tokens.fontDisplay,
