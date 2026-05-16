@@ -107,7 +107,7 @@ export default function ProductDetail() {
     const heroImage = selectedImage || images[0] || "";
 
     return (
-        <main className="relative w-full overflow-hidden bg-[#0e0e0e] text-[#f5f2ed]">
+        <main className="pt-25 relative w-full overflow-hidden bg-[#0e0e0e] text-[#f5f2ed]">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(201,169,110,0.12),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.04),transparent_28%)]" />
 
             <section className="relative mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
