@@ -1,7 +1,15 @@
+import { Link } from "react-router";
 import { ArrowRight, Star, TrendingUp, Zap } from "lucide-react";
 
 // ─── HERO SECTION ──────────────────────────────────────────────────────────────
-function HeroSection({tokens}) {
+function HeroSection({ tokens, featuredProduct, totalProducts = 0, totalCategories = 0 }) {
+    const heroImage = featuredProduct?.image || "";
+    const heroTitle = featuredProduct?.title || "Artisan Vessel No. 7";
+    const heroPrice = featuredProduct?.priceLabel || "$248";
+    const heroCopy = featuredProduct?.description || "Curated artifacts at the intersection of craft and concept. Each piece is selected from the live catalog.";
+    const heroLink = featuredProduct?.category ? `/collections?q=${encodeURIComponent(featuredProduct.category)}` : "/collections";
+    const detailLink = featuredProduct ? `/products/${featuredProduct.id}` : "/lookbook";
+
     return (
         <section style={{
             minHeight: "100vh",
@@ -51,7 +59,7 @@ function HeroSection({tokens}) {
                     <div className="animate-fade-up opacity-0-init stagger-1" style={{ marginBottom: 24 }}>
                         <span className="tag-pill" style={{ alignItems: "center", display: "inline-flex" }}>
                             <TrendingUp size={10} style={{ verticalAlign: "middle" }} />
-                            &nbsp;SS 2026 Collection
+                            &nbsp;Live Catalog Drop
                         </span>
                     </div>
 
@@ -71,18 +79,17 @@ function HeroSection({tokens}) {
                         lineHeight: 1.75, marginBottom: 44,
                         maxWidth: 460, fontWeight: 300
                     }}>
-                        Curated artifacts at the intersection of craft and concept.
-                        Each piece selected for those who see the world differently.
+                        {heroCopy}
                     </p>
 
                     <div className="animate-fade-up opacity-0-init stagger-4"
                         style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
-                        <button className="btn-primary">
+                        <Link className="btn-primary" to={heroLink} style={{ textDecoration: "none" }}>
                             Shop the Edit <ArrowRight size={16} />
-                        </button>
-                        <button className="btn-ghost">
+                        </Link>
+                        <Link className="btn-ghost" to={detailLink} style={{ textDecoration: "none" }}>
                             Explore Lookbook
-                        </button>
+                        </Link>
                     </div>
 
                     {/* Social proof strip */}
@@ -107,7 +114,7 @@ function HeroSection({tokens}) {
                                 ))}
                             </div>
                             <p style={{ fontSize: 13, color: "var(--stone)" }}>
-                                <strong style={{ color: "var(--chalk)" }}>4,800+</strong> collectors worldwide
+                                <strong style={{ color: "var(--chalk)" }}>{totalProducts || 0}+</strong> live products across <strong style={{ color: "var(--chalk)" }}>{totalCategories || 0}</strong> categories
                             </p>
                         </div>
                     </div>
@@ -124,23 +131,26 @@ function HeroSection({tokens}) {
                         borderRadius: 6,
                         overflow: "hidden",
                         boxShadow: "0 40px 80px rgba(0,0,0,0.6)",
-                        border: "1px solid rgba(201,169,110,0.2)"
+                        border: "1px solid rgba(201,169,110,0.2)",
+                        background: "var(--mid)"
                     }}>
-                        <div style={{
-                            height: "clamp(240px, 25vh, 320px)",
-                            background: "linear-gradient(145deg, #2a2420 0%, #1a1410 100%)",
-                            display: "flex", alignItems: "center", justifyContent: "center",
-                            fontSize: 80
-                        }}>🏺</div>
+                        <div style={{ height: "clamp(240px, 25vh, 320px)", display: "flex", alignItems: "center", justifyContent: "center", padding: 0 }}>
+                            {heroImage ? (
+                                <img src={heroImage} alt={heroTitle} style={{ width: "100%", height: "100%", objectFit: "contain", objectPosition: "center" }} />
+                            ) : (
+                                <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 80 }}>🏺</div>
+                            )}
+                        </div>
+
                         <div style={{ padding: "20px", background: "var(--mid)" }}>
                             <div className="tag-pill" style={{ marginBottom: 10 }}>
                                 <Zap size={9} /> New Season
                             </div>
                             <p style={{ fontFamily: tokens.fontDisplay, fontSize: 18, marginBottom: 4 }}>
-                                Artisan Vessel No. 7
+                                {heroTitle}
                             </p>
                             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                <span style={{ color: "var(--accent)", fontWeight: 600, fontSize: 17 }}>$248</span>
+                                <span style={{ color: "var(--accent)", fontWeight: 600, fontSize: 17 }}>{heroPrice}</span>
                                 <div style={{ display: "flex", gap: 2 }}>
                                     {[...Array(5)].map((_, i) => (
                                         <Star key={i} size={11} fill="#c9a96e" color="#c9a96e" />
@@ -149,7 +159,7 @@ function HeroSection({tokens}) {
                             </div>
                         </div>
                     </div>
-                    {/* Floating badge */}
+
                     <div style={{
                         position: "absolute", top: -16, left: -16,
                         background: "var(--accent)",
@@ -160,7 +170,7 @@ function HeroSection({tokens}) {
                         fontFamily: tokens.fontMono,
                         letterSpacing: "0.06em",
                         boxShadow: "0 8px 24px rgba(201,169,110,0.4)"
-                    }}>★ TRENDING</div>
+                    }}>{featuredProduct ? "★ TRENDING" : "★ LIVE"}</div>
                 </div>
 
             </div>
