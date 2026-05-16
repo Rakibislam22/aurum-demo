@@ -1,16 +1,25 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router";
 import { FiMenu, FiSearch, FiShoppingBag, FiStar, FiUser, FiX } from "react-icons/fi";
+import AuthModal from "./AuthModal";
+import { getCurrentUser, logout, subscribeAuth } from "../lib/auth";
+import { getCartCount, subscribeCart } from "../lib/cart";
 import { siteLinks } from "../lib/siteTheme";
 
 function Navigation() {
     const navigate = useNavigate();
     const searchPanelRef = useRef(null);
     const searchButtonRef = useRef(null);
+    const accountButtonRef = useRef(null);
+    const accountMenuRef = useRef(null);
     const [scrolled, setScrolled] = useState(false);
-    const [cartCount] = useState(3);
+    const [cartCount, setCartCount] = useState(() => getCartCount());
+    const [currentUser, setCurrentUser] = useState(() => getCurrentUser());
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [searchOpen, setSearchOpen] = useState(false);
+    const [accountMenuOpen, setAccountMenuOpen] = useState(false);
+    const [authModalOpen, setAuthModalOpen] = useState(false);
+    const [authMode, setAuthMode] = useState("login");
     const [searchQuery, setSearchQuery] = useState("");
     const [searchResults, setSearchResults] = useState([]);
     const [searchLoading, setSearchLoading] = useState(false);
@@ -33,24 +42,30 @@ function Navigation() {
         };
     }, [mobileMenuOpen]);
 
+    useEffect(() => subscribeCart(() => setCartCount(getCartCount())), []);
+
+    useEffect(() => subscribeAuth(() => setCurrentUser(getCurrentUser())), []);
+
     useEffect(() => {
         function handlePointerDown(event) {
-            if (!searchOpen) {
-                return;
-            }
-
             const clickedSearchButton = searchButtonRef.current?.contains(event.target);
             const clickedSearchPanel = searchPanelRef.current?.contains(event.target);
+            const clickedAccountButton = accountButtonRef.current?.contains(event.target);
+            const clickedAccountPanel = accountMenuRef.current?.contains(event.target);
 
-            if (!clickedSearchButton && !clickedSearchPanel) {
+            if (searchOpen && !clickedSearchButton && !clickedSearchPanel) {
                 setSearchOpen(false);
+            }
+
+            if (accountMenuOpen && !clickedAccountButton && !clickedAccountPanel) {
+                setAccountMenuOpen(false);
             }
         }
 
         document.addEventListener("mousedown", handlePointerDown);
 
         return () => document.removeEventListener("mousedown", handlePointerDown);
-    }, [searchOpen]);
+    }, [accountMenuOpen, searchOpen]);
 
     useEffect(() => {
         const query = searchQuery.trim();
@@ -110,6 +125,8 @@ function Navigation() {
         cursor: "pointer",
         transition: "color 0.2s, background 0.2s",
     };
+
+    const primaryLinks = siteLinks.map((link) => (link.label === "About" && currentUser ? { label: "My Orders", to: "/my-orders" } : link));
 
     return (
         <header
@@ -177,7 +194,7 @@ function Navigation() {
                 </Link>
 
                 <div className="hide-mobile" style={{ display: "flex", gap: 36, alignItems: "center", justifyContent: "center", flex: 1 }}>
-                    {siteLinks.map((link) => (
+                    {primaryLinks.map((link) => (
                         <NavLink key={link.to} to={link.to} className="nav-link">
                             {link.label}
                         </NavLink>
@@ -319,9 +336,11 @@ function Navigation() {
                     )}
 
                     <button
+                        ref={accountButtonRef}
                         type="button"
                         style={navButtonStyle}
                         aria-label="account"
+                        onClick={() => setAccountMenuOpen((open) => !open)}
                         onMouseEnter={(e) => {
                             e.currentTarget.style.color = "var(--chalk)";
                             e.currentTarget.style.background = "rgba(245,242,237,0.06)";
@@ -334,9 +353,150 @@ function Navigation() {
                         <FiUser size={18} />
                     </button>
 
-                    <button
-                        type="button"
-                        style={{ ...navButtonStyle, position: "relative" }}
+                    {accountMenuOpen && (
+                        <div
+                            ref={accountMenuRef}
+                            style={{
+                                position: "absolute",
+                                right: 78,
+                                top: 58,
+                                width: 260,
+                                maxWidth: "calc(100vw - 40px)",
+                                background: "rgba(14,14,14,0.98)",
+                                border: "1px solid rgba(255,255,255,0.08)",
+                                borderRadius: 14,
+                                padding: 14,
+                                boxShadow: "0 20px 50px rgba(0,0,0,0.5)",
+                                zIndex: 320,
+                            }}
+                        >
+                            <div style={{ marginBottom: 12 }}>
+                                <p style={{ fontSize: 10, letterSpacing: "0.28em", textTransform: "uppercase", color: "#a39a8c" }}>
+                                    Account
+                                </p>
+                                <p style={{ marginTop: 8, fontSize: 15, fontWeight: 600, color: "var(--chalk)" }}>
+                                    {currentUser ? `Hi, ${currentUser.name}` : "Welcome back"}
+                                </p>
+                                <p style={{ marginTop: 6, fontSize: 12, color: "#a39a8c", lineHeight: 1.6 }}>
+                                    {currentUser ? currentUser.email : "Login here or create an account to save your session."}
+                                </p>
+                            </div>
+
+                            {!currentUser ? (
+                                <div style={{ display: "grid", gap: 8 }}>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setAuthMode("login");
+                                            setAuthModalOpen(true);
+                                            setAccountMenuOpen(false);
+                                        }}
+                                        style={{
+                                            width: "100%",
+                                            border: "1px solid rgba(201,169,110,0.25)",
+                                            background: "rgba(201,169,110,0.08)",
+                                            color: "var(--chalk)",
+                                            borderRadius: 12,
+                                            padding: "12px 14px",
+                                            fontSize: 13,
+                                            fontWeight: 600,
+                                            textAlign: "left",
+                                            cursor: "pointer",
+                                        }}
+                                    >
+                                        Login here
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setAuthMode("register");
+                                            setAuthModalOpen(true);
+                                            setAccountMenuOpen(false);
+                                        }}
+                                        style={{
+                                            width: "100%",
+                                            border: "1px solid rgba(255,255,255,0.08)",
+                                            background: "transparent",
+                                            color: "var(--chalk)",
+                                            borderRadius: 12,
+                                            padding: "12px 14px",
+                                            fontSize: 13,
+                                            fontWeight: 600,
+                                            textAlign: "left",
+                                            cursor: "pointer",
+                                        }}
+                                    >
+                                        Create account
+                                    </button>
+                                </div>
+                            ) : (
+                                <div style={{ display: "grid", gap: 8 }}>
+                                    <button
+                                        type="button"
+                                        onClick={() => navigate("/my-orders")}
+                                        style={{
+                                            width: "100%",
+                                            border: "1px solid rgba(201,169,110,0.25)",
+                                            background: "rgba(201,169,110,0.08)",
+                                            color: "var(--chalk)",
+                                            borderRadius: 12,
+                                            padding: "12px 14px",
+                                            fontSize: 13,
+                                            fontWeight: 600,
+                                            textAlign: "left",
+                                            cursor: "pointer",
+                                        }}
+                                    >
+                                        My Orders
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => navigate("/cart")}
+                                        style={{
+                                            width: "100%",
+                                            border: "1px solid rgba(201,169,110,0.25)",
+                                            background: "rgba(201,169,110,0.08)",
+                                            color: "var(--chalk)",
+                                            borderRadius: 12,
+                                            padding: "12px 14px",
+                                            fontSize: 13,
+                                            fontWeight: 600,
+                                            textAlign: "left",
+                                            cursor: "pointer",
+                                        }}
+                                    >
+                                        View cart
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            logout();
+                                            setCurrentUser(null);
+                                            setAccountMenuOpen(false);
+                                        }}
+                                        style={{
+                                            width: "100%",
+                                            border: "1px solid rgba(255,255,255,0.08)",
+                                            background: "transparent",
+                                            color: "var(--chalk)",
+                                            borderRadius: 12,
+                                            padding: "12px 14px",
+                                            fontSize: 13,
+                                            fontWeight: 600,
+                                            textAlign: "left",
+                                            cursor: "pointer",
+                                        }}
+                                    >
+                                        Logout
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    <Link
+                        to="/cart"
+                        style={{ ...navButtonStyle, position: "relative", textDecoration: "none" }}
                         aria-label="cart"
                         onMouseEnter={(e) => {
                             e.currentTarget.style.color = "var(--chalk)";
@@ -369,7 +529,7 @@ function Navigation() {
                                 {cartCount}
                             </span>
                         )}
-                    </button>
+                    </Link>
 
                     <button
                         className="show-mobile"
@@ -407,13 +567,22 @@ function Navigation() {
                         gap: 16,
                     }}
                 >
-                    {siteLinks.map((link) => (
+                    {primaryLinks.map((link) => (
                         <NavLink key={link.to} to={link.to} onClick={() => setMobileMenuOpen(false)} className="nav-link">
                             {link.label}
                         </NavLink>
                     ))}
                 </div>
             )}
+
+            <AuthModal
+                key={`${authMode}-${authModalOpen ? "open" : "closed"}`}
+                open={authModalOpen}
+                mode={authMode}
+                onClose={() => setAuthModalOpen(false)}
+                onSuccess={(user) => setCurrentUser(user)}
+                switchMode={(nextMode) => setAuthMode(nextMode)}
+            />
         </header>
     );
 }
