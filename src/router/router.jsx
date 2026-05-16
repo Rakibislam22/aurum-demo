@@ -4,6 +4,9 @@ import SiteLayout from "../layouts/SiteLayout";
 import About from "../pages/About";
 import Collections from "../pages/Collections";
 import Lookbook from "../pages/Lookbook";
+import Cart from "../pages/Cart";
+import Checkout from "../pages/Checkout";
+import MyOrders from "../pages/MyOrders";
 import ProductDetail from "../pages/ProductDetail";
 import NewArrivals from "../pages/NewArrivals";
 import NewArrivalDetail from "../pages/NewArrivalDetail";
@@ -32,6 +35,18 @@ const router = createBrowserRouter([
       {
         path: "new-arrivals/:id",
         element: <NewArrivalDetail />,
+      },
+      {
+        path: "cart",
+        element: <Cart />,
+      },
+      {
+        path: "checkout",
+        element: <Checkout />,
+      },
+      {
+        path: "my-orders",
+        element: <MyOrders />,
       },
       {
         path: "lookbook",

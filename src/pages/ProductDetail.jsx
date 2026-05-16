@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { FiArrowLeft, FiStar, FiShoppingBag } from "react-icons/fi";
 import { Link, useParams } from "react-router";
+import { addToCart } from "../lib/cart";
 import { siteTokens } from "../lib/siteTheme";
 
 const currencyFormatter = new Intl.NumberFormat("en-US", {
@@ -48,15 +49,13 @@ function Stars({ value = 0 }) {
 export default function ProductDetail() {
     const { id } = useParams();
     const [product, setProduct] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(() => Boolean(id));
     const [error, setError] = useState("");
     const [selectedImage, setSelectedImage] = useState("");
     const [cartMessage, setCartMessage] = useState("");
 
     useEffect(() => {
         if (!id) {
-            setError("Missing product id.");
-            setLoading(false);
             return undefined;
         }
 
@@ -97,21 +96,21 @@ export default function ProductDetail() {
         return Array.from(new Set(list));
     }, [product]);
 
-    useEffect(() => {
-        setSelectedImage(images[0] || "");
-    }, [images]);
-
     const reviews = useMemo(() => {
         return product?.reviews?.length ? product.reviews : FALLBACK_REVIEWS;
     }, [product]);
 
-    const heroImage = selectedImage || images[0] || "";
+    const heroImage = images.includes(selectedImage) ? selectedImage : images[0] || "";
 
     function handleAddToCart() {
         try {
-            const cart = JSON.parse(window.localStorage.getItem("cart") || "[]");
-            cart.push({ id: product.id, title: product.title, price: product.price, image: product.thumbnail || product.images?.[0] || "" });
-            window.localStorage.setItem("cart", JSON.stringify(cart));
+            addToCart({
+                id: product.id,
+                title: product.title,
+                price: product.price,
+                image: product.thumbnail || product.images?.[0] || "",
+                category: product.category,
+            });
             setCartMessage("Added to cart");
             setTimeout(() => setCartMessage(""), 2500);
         } catch (e) {

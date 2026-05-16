@@ -1,8 +1,19 @@
 import { FiArrowRight, FiEye, FiShoppingBag, FiStar } from "react-icons/fi";
 import { Link } from "react-router";
+import { addToCart } from "../lib/cart";
 import { NEW_ARRIVALS, formatNewArrivalPrice } from "../lib/newArrivalsData";
 
 function ArrivalCard({ item }) {
+    function handleAddToCart() {
+        addToCart({
+            id: item.id,
+            title: item.name,
+            price: item.price,
+            image: item.image,
+            category: item.category,
+        });
+    }
+
     return (
         <article className="group overflow-hidden rounded-[28px] border border-white/8 bg-[#131111] shadow-[0_24px_80px_rgba(0,0,0,0.28)] transition-all duration-500 hover:-translate-y-1 hover:border-[#c9a96e]/30">
             <div className="relative aspect-4/5 overflow-hidden">
@@ -30,6 +41,7 @@ function ArrivalCard({ item }) {
                     </Link>
                     <button
                         type="button"
+                        onClick={handleAddToCart}
                         className="inline-flex items-center justify-center gap-1 rounded-full bg-[#c9a96e] px-3 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-[#0e0e0e] transition-transform duration-300 hover:scale-[1.02]"
                     >
                         <FiShoppingBag />

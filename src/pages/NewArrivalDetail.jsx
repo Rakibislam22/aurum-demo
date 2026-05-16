@@ -1,5 +1,6 @@
 import { FiArrowLeft, FiArrowRight, FiShoppingBag, FiStar } from "react-icons/fi";
 import { Link, useParams } from "react-router";
+import { addToCart } from "../lib/cart";
 import { siteTokens } from "../lib/siteTheme";
 import { formatNewArrivalPrice, getNewArrivalById } from "../lib/newArrivalsData";
 
@@ -143,6 +144,7 @@ export default function NewArrivalDetail() {
                         <div className="flex flex-col gap-3 sm:flex-row">
                             <button
                                 type="button"
+                                onClick={() => addToCart({ id: item.id, title: item.name, price: item.price, image: item.image, category: item.category })}
                                 className="inline-flex items-center justify-center gap-2 rounded-full bg-[#c9a96e] px-5 py-3 text-xs font-semibold uppercase tracking-[0.28em] text-[#0e0e0e] transition-transform duration-300 hover:scale-[1.02]"
                             >
                                 <FiShoppingBag />

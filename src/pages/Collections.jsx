@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { FiArrowRight, FiFilter, FiShoppingBag } from "react-icons/fi";
 import { Link, useSearchParams } from "react-router";
+import { addToCart } from "../lib/cart";
 import { siteTokens } from "../lib/siteTheme";
 
 const CATEGORY_FILTERS = ["All", "Men", "Women", "Accessories", "Home"];
@@ -287,6 +288,7 @@ export default function Collections() {
                                                 </Link>
                                                 <button
                                                     type="button"
+                                                    onClick={() => handleAddToCart(product)}
                                                     className="inline-flex items-center justify-center gap-1 rounded-full bg-[#c9a96e] px-3 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-[#0e0e0e] transition-transform duration-300 hover:scale-[1.02]"
                                                 >
                                                     Add to Cart
@@ -328,4 +330,14 @@ export default function Collections() {
             </div>
         </main>
     );
+}
+
+function handleAddToCart(product) {
+    addToCart({
+        id: product.id,
+        title: product.title,
+        price: product.price,
+        image: product.image,
+        category: product.category,
+    });
 }
