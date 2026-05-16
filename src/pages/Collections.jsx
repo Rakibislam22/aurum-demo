@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { FiArrowRight, FiFilter, FiShoppingBag } from "react-icons/fi";
-import { Link } from "react-router";
+import { Link, useSearchParams } from "react-router";
 import { siteTokens } from "../lib/siteTheme";
 
 const CATEGORY_FILTERS = ["All", "Men", "Women", "Accessories", "Home"];
@@ -22,6 +22,37 @@ const PRODUCT_API_ENDPOINTS = [
     "https://dummyjson.com/products?limit=500",
     "https://dummyjson.com/products",
 ];
+
+const QUERY_CATEGORY_MAP = {
+    accessories: "mobile-accessories",
+    "mobile accessories": "mobile-accessories",
+    "mobile-accessories": "mobile-accessories",
+    men: "mens-shirts",
+    women: "womens-dresses",
+    home: "home-decoration",
+    furniture: "furniture",
+    groceries: "groceries",
+    phones: "smartphones",
+    phone: "smartphones",
+    electronics: "smartphones",
+};
+
+function resolveSearchEndpoint(query) {
+    const normalizedQuery = query.trim().toLowerCase();
+    const categorySlug = QUERY_CATEGORY_MAP[normalizedQuery];
+
+    if (categorySlug) {
+        return `https://dummyjson.com/products/category/${categorySlug}`;
+    }
+
+    // If the query already looks like a slug (e.g. "smartphones" or "mobile-accessories"),
+    // call the category endpoint directly so landing-category links resolve to categories.
+    if (/^[a-z0-9-]+$/.test(normalizedQuery)) {
+        return `https://dummyjson.com/products/category/${encodeURIComponent(normalizedQuery)}`;
+    }
+
+    return `https://dummyjson.com/products/search?q=${encodeURIComponent(query.trim())}`;
+}
 
 function normalizeProduct(product) {
     return {
@@ -78,6 +109,9 @@ function CollectionsSkeleton() {
 }
 
 export default function Collections() {
+    const [searchParams] = useSearchParams();
+    const rawSearchQuery = searchParams.get("q") || "";
+    const searchQuery = rawSearchQuery && rawSearchQuery !== "undefined" && rawSearchQuery !== "null" ? rawSearchQuery : "";
     const [activeFilter, setActiveFilter] = useState("All");
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -91,6 +125,20 @@ export default function Collections() {
             setError("");
 
             try {
+                if (searchQuery.trim()) {
+                    const response = await fetch(resolveSearchEndpoint(searchQuery), {
+                        signal: controller.signal,
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`Request failed with status ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    setProducts((data.products || []).map(normalizeProduct));
+                    return;
+                }
+
                 let lastError = null;
 
                 for (const endpoint of PRODUCT_API_ENDPOINTS) {
@@ -132,7 +180,7 @@ export default function Collections() {
 
         loadProducts();
         return () => controller.abort();
-    }, []);
+    }, [searchQuery]);
 
     const visibleProducts = useMemo(() => products.filter((product) => matchesActiveFilter(product, activeFilter)), [activeFilter, products]);
 
@@ -143,6 +191,12 @@ export default function Collections() {
                 <CollectionsHeader />
 
                 <section className="mx-auto max-w-7xl px-4 pb-24 sm:px-6 lg:px-8">
+                    {searchQuery && (
+                        <div className="mb-6 rounded-3xl border border-white/10 bg-white/5 p-4 text-sm text-[#d8d1c7] backdrop-blur-sm">
+                            Showing results for <span className="text-[#f5f2ed]">{searchQuery}</span>
+                        </div>
+                    )}
+
                     <div className="sticky top-18 z-40 mb-8 flex flex-col gap-6 rounded-3xl border border-white/10 bg-[#0e0e0e]/90 p-6 backdrop-blur-sm md:flex-row md:items-center md:justify-between">
                         <div className="flex items-center gap-3 text-sm text-[#d8d1c7]" style={{ fontFamily: siteTokens.fontBody }}>
                             <FiFilter className="text-[#c9a96e]" />
