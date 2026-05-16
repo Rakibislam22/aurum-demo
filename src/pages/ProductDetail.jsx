@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { FiArrowLeft, FiStar } from "react-icons/fi";
+import { FiArrowLeft, FiStar, FiShoppingBag } from "react-icons/fi";
 import { Link, useParams } from "react-router";
 import { siteTokens } from "../lib/siteTheme";
 
@@ -51,6 +51,7 @@ export default function ProductDetail() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const [selectedImage, setSelectedImage] = useState("");
+    const [cartMessage, setCartMessage] = useState("");
 
     useEffect(() => {
         if (!id) {
@@ -106,6 +107,19 @@ export default function ProductDetail() {
 
     const heroImage = selectedImage || images[0] || "";
 
+    function handleAddToCart() {
+        try {
+            const cart = JSON.parse(window.localStorage.getItem("cart") || "[]");
+            cart.push({ id: product.id, title: product.title, price: product.price, image: product.thumbnail || product.images?.[0] || "" });
+            window.localStorage.setItem("cart", JSON.stringify(cart));
+            setCartMessage("Added to cart");
+            setTimeout(() => setCartMessage(""), 2500);
+        } catch (e) {
+            console.error("Add to cart failed", e);
+            setCartMessage("Could not add to cart");
+            setTimeout(() => setCartMessage(""), 2500);
+        }
+    }
     return (
         <main className="pt-25 relative w-full overflow-hidden bg-[#0e0e0e] text-[#f5f2ed]">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(201,169,110,0.12),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.04),transparent_28%)]" />
@@ -172,6 +186,18 @@ export default function ProductDetail() {
                                     />
                                     <div className="pointer-events-none absolute inset-0 bg-linear-to-t from-black/40 via-transparent to-transparent" />
                                 </div>
+                            </div>
+
+                            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+                                <button
+                                    type="button"
+                                    onClick={handleAddToCart}
+                                    className="inline-flex items-center justify-center gap-2 rounded-full bg-[#c9a96e] px-5 py-3 text-xs font-semibold uppercase tracking-[0.28em] text-[#0e0e0e] transition-transform duration-300 hover:scale-[1.02]"
+                                >
+                                    <FiShoppingBag />
+                                    Add to Cart
+                                </button>
+                                {cartMessage && <span className="text-sm text-[#a39a8c]">{cartMessage}</span>}
                             </div>
 
                             <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
