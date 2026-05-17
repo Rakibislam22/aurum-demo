@@ -3,6 +3,8 @@ import { toast } from "react-toastify";
 const USERS_STORAGE_KEY = "auth:users";
 const CURRENT_USER_KEY = "auth:currentUser";
 const AUTH_EVENT_NAME = "auth:changed";
+const DEMO_EMAIL = "demo@gmail.com";
+const DEMO_PASSWORD = "1234";
 
 function readJson(key, fallback) {
     if (typeof window === "undefined") {
@@ -90,6 +92,21 @@ export function login({ email, password }) {
 
     if (!trimmedEmail || !trimmedPassword) {
         throw new Error("Please enter your email and password.");
+    }
+
+    // Check hardcoded demo credentials
+    if (trimmedEmail === DEMO_EMAIL && trimmedPassword === DEMO_PASSWORD) {
+        const demoUser = {
+            id: "demo-user-001",
+            name: "Demo User",
+            email: DEMO_EMAIL,
+            createdAt: new Date().toISOString(),
+        };
+        setCurrentUser(demoUser);
+        toast.success(`Logged in as Demo User`, {
+            toastId: `auth-login-${trimmedEmail}`,
+        });
+        return demoUser;
     }
 
     const users = getStoredUsers();

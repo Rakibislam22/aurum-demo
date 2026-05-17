@@ -12,7 +12,7 @@ const WELCOME_KEY = "aurum:auth-welcome-seen";
 function initialFormState(mode) {
     return mode === MODES.register
         ? { name: "", email: "", password: "" }
-        : { email: "", password: "" };
+        : { email: "demo@gmail.com", password: "1234" };
 }
 
 export default function AuthModal({ open, mode, onClose, onSuccess, switchMode }) {
@@ -147,7 +147,7 @@ export default function AuthModal({ open, mode, onClose, onSuccess, switchMode }
                                     value={formValues.email}
                                     onChange={(event) => setFormValues((current) => ({ ...current, email: event.target.value }))}
                                     className="w-full bg-transparent text-[#f5f2ed] outline-none placeholder:text-[#6f665b]"
-                                    placeholder="you@example.com"
+                                    placeholder="demo@gmail.com"
                                     autoComplete="email"
                                 />
                             </div>

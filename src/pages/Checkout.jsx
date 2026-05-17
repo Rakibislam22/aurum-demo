@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { FiArrowRight, FiMapPin, FiSave, FiUser } from "react-icons/fi";
 import { Link, useNavigate } from "react-router";
+import AuthModal from "../components/AuthModal";
 import CheckoutSuccessModal from "../components/CheckoutSuccessModal";
 import { getCurrentUser, subscribeAuth } from "../lib/auth";
 import { clearCart, getCartItems, subscribeCart } from "../lib/cart";
@@ -70,6 +71,8 @@ export default function Checkout() {
     const [saveAddressChecked, setSaveAddressChecked] = useState(true);
     const [successOpen, setSuccessOpen] = useState(false);
     const [orderNumber, setOrderNumber] = useState("");
+    const [authModalOpen, setAuthModalOpen] = useState(false);
+    const [authMode, setAuthMode] = useState("login");
 
     useEffect(() => subscribeAuth(() => {
         const nextUser = getCurrentUser();
@@ -103,18 +106,16 @@ export default function Checkout() {
 
     useEffect(() => {
         if (!currentUser) {
-            toast.info("Please login to checkout.");
-            navigate("/cart", { replace: true });
+            setAuthModalOpen(true);
+        } else {
+            setAuthModalOpen(false);
         }
-    }, [currentUser, navigate]);
+    }, [currentUser]);
 
     const subtotal = cartItems.reduce((total, item) => total + (Number(item.price) || 0) * (item.quantity || 0), 0);
     const shipping = cartItems.length ? 18 : 0;
     const total = subtotal + shipping;
 
-    if (!currentUser) {
-        return null;
-    }
 
     function handleSelectAddress(address) {
         setSelectedAddressId(address.id);
@@ -214,6 +215,7 @@ export default function Checkout() {
         <main className="relative overflow-hidden bg-[#0e0e0e] text-[#f5f2ed]">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(201,169,110,0.12),transparent_30%),linear-gradient(180deg,rgba(255,255,255,0.03),transparent_20%)]" />
 
+            {currentUser && (
             <section className="relative mx-auto max-w-7xl px-4 pb-24 pt-36 sm:px-6 lg:px-8">
                 <div className="max-w-3xl">
                     <p className="text-xs font-semibold uppercase tracking-[0.35em] text-[#c9a96e]" style={{ fontFamily: siteTokens.fontMono }}>
@@ -436,6 +438,7 @@ export default function Checkout() {
                     </aside>
                 </div>
             </section>
+            )}
 
             <CheckoutSuccessModal
                 open={successOpen}
@@ -444,6 +447,17 @@ export default function Checkout() {
                     setSuccessOpen(false);
                     navigate("/collections");
                 }}
+            />
+
+            <AuthModal
+                open={authModalOpen}
+                mode={authMode}
+                onClose={() => {
+                    setAuthModalOpen(false);
+                    navigate("/cart");
+                }}
+                onSuccess={() => setAuthModalOpen(false)}
+                switchMode={(newMode) => setAuthMode(newMode)}
             />
         </main>
     );
